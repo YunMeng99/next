@@ -1,8 +1,9 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React from 'react';
 import cx from 'classnames';
+import PropTypes from 'prop-types';
 import ConfigProvider from '../config-provider';
 import { obj } from '../util';
+import { BoxProps } from './types';
 import createStyle, {
     getMargin,
     getChildMargin,
@@ -10,27 +11,30 @@ import createStyle, {
     filterInnerStyle,
     filterHelperStyle,
     filterOuterStyle,
-    getGridChildProps,
-    // getBoxChildProps,
 } from '../responsive-grid/create-style';
 
 const { pickOthers } = obj;
 
-const createChildren = (children, { spacing, direction, wrap, device }) => {
+type ChildElement = React.ReactElement<
+    BoxProps,
+    (string | React.JSXElementConstructor<BoxProps>) & { _typeMark: string }
+>;
+const createChildren = (children: React.ReactNode, { spacing, direction, wrap }: BoxProps) => {
     const array = React.Children.toArray(children);
     if (!children) {
         return null;
     }
 
     return array.map((child, index) => {
-        let spacingMargin = {};
+        let spacingMargin: { [key: string]: string | number } = {};
 
         spacingMargin = getChildMargin(spacing);
 
         if (!wrap) {
             // 不折行
             const isNone = [index === 0, index === array.length - 1];
-            const props = direction === 'row' ? ['marginLeft', 'marginRight'] : ['marginTop', 'marginBottom'];
+            const props =
+                direction === 'row' ? ['marginLeft', 'marginRight'] : ['marginTop', 'marginBottom'];
 
             ['marginTop', 'marginRight', 'marginBottom', 'marginLeft'].forEach(prop => {
                 if (prop in spacingMargin && props.indexOf(prop) === -1) {
@@ -49,12 +53,14 @@ const createChildren = (children, { spacing, direction, wrap, device }) => {
             const { margin: propsMargin } = child.props;
             const childPropsMargin = getMargin(propsMargin);
             let gridProps = {};
-
-            if (['function', 'object'].indexOf(typeof child.type) > -1 && child.type._typeMark === 'responsive_grid') {
+            if (
+                ['function', 'object'].indexOf(typeof child.type) > -1 &&
+                (child as ChildElement).type._typeMark === 'responsive_grid'
+            ) {
                 gridProps = createStyle({ display: 'grid', ...child.props });
             }
 
-            return React.cloneElement(child, {
+            return React.cloneElement(child as React.ReactElement, {
                 style: {
                     ...spacingMargin,
                     // ...getBoxChildProps(child.props),
@@ -69,20 +75,21 @@ const createChildren = (children, { spacing, direction, wrap, device }) => {
     });
 };
 
-const getStyle = (style = {}, props) => {
+const getStyle = (style: React.CSSProperties | undefined, props: BoxProps) => {
     return {
+        // @ts-expect-error fixme: wait responsive-grid refactor to ts
         ...createStyle({ display: 'flex', ...props }),
         ...style,
     };
 };
 
-const getOuterStyle = (style, styleProps) => {
+const getOuterStyle: typeof getStyle = (style, styleProps) => {
     const sheet = getStyle(style, styleProps);
 
     return filterOuterStyle(sheet);
 };
 
-const getHelperStyle = (style, styleProps) => {
+const getHelperStyle: typeof getStyle = (style, styleProps) => {
     const sheet = getStyle(style, styleProps);
 
     return filterHelperStyle({
@@ -91,7 +98,7 @@ const getHelperStyle = (style, styleProps) => {
     });
 };
 
-const getInnerStyle = (style, styleProps) => {
+const getInnerStyle: typeof getStyle = (style, styleProps) => {
     const sheet = getStyle(style, styleProps);
 
     return filterInnerStyle(sheet);
@@ -100,7 +107,7 @@ const getInnerStyle = (style, styleProps) => {
 /**
  * Box
  */
-class Box extends Component {
+class Box extends React.Component<BoxProps> {
     static propTypes = {
         prefix: PropTypes.string,
         style: PropTypes.object,
@@ -114,7 +121,7 @@ class Box extends Component {
         ]),
         /**
          * 布局方向，默认为 column ，一个元素占据一整行
-         * @default column
+         * @defaultValue column
          */
         direction: PropTypes.oneOf(['row', 'column', 'row-reverse']),
         /**
@@ -136,7 +143,13 @@ class Box extends Component {
         /**
          * 沿着主轴方向，子元素们的排布关系 （兼容性同 justify-content ）
          */
-        justify: PropTypes.oneOf(['flex-start', 'center', 'flex-end', 'space-between', 'space-around']),
+        justify: PropTypes.oneOf([
+            'flex-start',
+            'center',
+            'flex-end',
+            'space-between',
+            'space-around',
+        ]),
         /**
          * 垂直主轴方向，子元素们的排布关系 （兼容性同 align-items ）
          */
@@ -147,7 +160,6 @@ class Box extends Component {
          */
         component: PropTypes.string,
     };
-
     static defaultProps = {
         prefix: 'next-',
         direction: 'column',
@@ -183,7 +195,8 @@ class Box extends Component {
             padding,
             margin,
         };
-        const View = component;
+        const View = component!;
+
         const others = pickOthers(Object.keys(Box.propTypes), this.props);
         const styleSheet = getStyle(style, styleProps);
 
@@ -223,5 +236,5 @@ class Box extends Component {
         );
     }
 }
-
+export type { BoxProps };
 export default ConfigProvider.config(Box);
