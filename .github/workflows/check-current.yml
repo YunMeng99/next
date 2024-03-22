@@ -17,4 +17,5 @@ jobs:
         with:
           node-version: 16
           cache: 'npm'
-      - run: echo "$GITHUB_OUTPUT"
+      - run: npm ci
+      - run: npm run check:current
