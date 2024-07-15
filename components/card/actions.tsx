@@ -2,17 +2,14 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import ConfigProvider from '../config-provider';
-
+import { CardActionsProps } from './types';
 /**
  * Card.Actions
  * @order 5
  */
-class CardActions extends Component {
+class CardActions extends Component<CardActionsProps> {
     static propTypes = {
         prefix: PropTypes.string,
-        /**
-         * 设置标签类型
-         */
         component: PropTypes.elementType,
         className: PropTypes.string,
     };
@@ -23,7 +20,8 @@ class CardActions extends Component {
     };
 
     render() {
-        const { prefix, component: Component, className, ...others } = this.props;
+        const { prefix, component, className, ...others } = this.props;
+        const Component = component as React.ElementType;
         return <Component {...others} className={classNames(`${prefix}card-actions`, className)} />;
     }
 }

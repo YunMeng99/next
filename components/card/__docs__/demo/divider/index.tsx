@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import { Card, Button, Box } from '@alifd/next';
 
 const commonProps = {
-    title: 'Title',
     style: { width: 300 },
     subTitle: 'Sub-title',
     extra: (

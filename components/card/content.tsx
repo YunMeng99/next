@@ -2,12 +2,12 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import ConfigProvider from '../config-provider';
-
+import { CardContentProps } from './types';
 /**
  * Card.Content
  * @order 3
  */
-class CardContent extends Component {
+class CardContent extends Component<CardContentProps> {
     static propTypes = {
         prefix: PropTypes.string,
         /**
@@ -23,8 +23,14 @@ class CardContent extends Component {
     };
 
     render() {
-        const { prefix, className, component: Component, ...others } = this.props;
-        return <Component {...others} className={classNames(`${prefix}card-content-container`, className)} />;
+        const { prefix, className, component, ...others } = this.props;
+        const Component = component as React.ElementType;
+        return (
+            <Component
+                {...others}
+                className={classNames(`${prefix}card-content-container`, className)}
+            />
+        );
     }
 }
 

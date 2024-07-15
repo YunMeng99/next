@@ -5,12 +5,18 @@ import Icon from '../icon';
 import Button from '../button';
 import ConfigProvider from '../config-provider';
 import nextLocale from '../locale/zh-cn';
+import { CardCollapseContentProps } from './types';
 
+export interface CardCollapseContentState {
+    needMore: boolean;
+    expand: boolean;
+    contentHeight: string | number;
+}
 /**
  * Card.CollapseContent
  * @order 3
  */
-class CardCollapseContent extends Component {
+class CardCollapseContent extends Component<CardCollapseContentProps, CardCollapseContentState> {
     static propTypes = {
         prefix: PropTypes.string,
         /**
@@ -26,8 +32,10 @@ class CardCollapseContent extends Component {
         contentHeight: 120,
         locale: nextLocale.Card,
     };
+    content: any;
+    footer: any;
 
-    constructor(props, context) {
+    constructor(props: CardCollapseContentProps, context: unknown) {
         super(props, context);
 
         this.state = {
@@ -59,7 +67,7 @@ class CardCollapseContent extends Component {
         const { contentHeight } = this.props;
         const childrenHeight = this._getNodeChildrenHeight(this.content);
         this.setState({
-            needMore: contentHeight !== 'auto' && childrenHeight > contentHeight,
+            needMore: contentHeight !== 'auto' && childrenHeight > (contentHeight as Number),
         });
     }
 
@@ -78,14 +86,14 @@ class CardCollapseContent extends Component {
             let height = this.props.contentHeight;
 
             if (el) {
-                height = height - el.getBoundingClientRect().height;
+                height = (height as number) - (el as Element).getBoundingClientRect().height;
             }
 
             this.content.style.height = `${height}px`;
         }
     }
 
-    _getNodeChildrenHeight(node) {
+    _getNodeChildrenHeight(node: { childNodes: any }) {
         if (!node) {
             return 0;
         }
@@ -102,11 +110,11 @@ class CardCollapseContent extends Component {
         return lastNode.offsetTop + lastNode.offsetHeight;
     }
 
-    _contentRefHandler = ref => {
+    _contentRefHandler = (ref: any) => {
         this.content = ref;
     };
 
-    saveFooter = ref => {
+    saveFooter = (ref: any) => {
         this.footer = ref;
     };
 
@@ -120,9 +128,13 @@ class CardCollapseContent extends Component {
                     {children}
                 </div>
                 {needMore ? (
-                    <div className={`${prefix}card-footer`} ref={this.saveFooter} onClick={this.handleToggle}>
+                    <div
+                        className={`${prefix}card-footer`}
+                        ref={this.saveFooter}
+                        onClick={this.handleToggle}
+                    >
                         <Button text type="primary">
-                            {expand ? locale.fold : locale.expand}
+                            {expand ? locale!.fold : locale!.expand}
                             <Icon type="arrow-down" className={expand ? 'expand' : ''} />
                         </Button>
                     </div>
